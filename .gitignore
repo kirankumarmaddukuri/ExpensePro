@@ -1,0 +1,24 @@
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.eclipse/
+
+# Maven / Java
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/
+mvnw
+mvnw.cmd
+
+# Logs
+*.log
+backend/boot-error.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
