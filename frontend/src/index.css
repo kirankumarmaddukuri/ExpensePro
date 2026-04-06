@@ -81,6 +81,17 @@ button {
   font-family: var(--font-sans);
 }
 
+.tx-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.tx-select option {
+  background-color: #0b1020;
+  color: #f2f2f5;
+}
+
 /* Glassmorphic Panel Utility */
 .glass-panel {
   background: var(--bg-surface);

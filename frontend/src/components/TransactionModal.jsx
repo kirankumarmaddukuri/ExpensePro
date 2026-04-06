@@ -2,6 +2,23 @@ import React, { useState, useEffect } from 'react';
 import axios from '../api/axios.config';
 
 export default function TransactionModal({ isOpen, onClose, onSuccess, initialData }) {
+  const selectStyle = {
+    width: '100%',
+    padding: '12px',
+    borderRadius: '12px',
+    background: 'rgba(7, 10, 20, 0.95)',
+    border: '1px solid rgba(124, 58, 237, 0.45)',
+    color: '#f2f2f5',
+    colorScheme: 'dark'
+  };
+
+  const optionStyle = {
+    backgroundColor: '#0b1020',
+    color: '#f2f2f5'
+  };
+
+  const formatPaymentLabel = (method) => method.replaceAll('_', ' ');
+
   const getLocalDateString = () => {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -130,9 +147,9 @@ export default function TransactionModal({ isOpen, onClose, onSuccess, initialDa
              <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Category</label>
-                  <select name="categoryId" value={formData.categoryId} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--surface-color)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
+                  <select className="tx-select" name="categoryId" value={formData.categoryId} onChange={handleInputChange} style={selectStyle}>
                     {categories.filter(c => c.type === formData.type).map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                      <option key={cat.id} value={cat.id} style={optionStyle}>{cat.icon} {cat.name}</option>
                     ))}
                   </select>
                 </div>
@@ -143,12 +160,12 @@ export default function TransactionModal({ isOpen, onClose, onSuccess, initialDa
              </div>
              <div>
                 <label style={{ display: 'block', fontSize: '14px', marginBottom: '8px', color: 'var(--text-secondary)' }}>Payment Method</label>
-                <select name="paymentMethod" value={formData.paymentMethod} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: '12px', background: 'var(--surface-color)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
-                  <option value="CASH">CASH</option>
-                  <option value="CREDIT_CARD">CREDIT_CARD</option>
-                  <option value="DEBIT_CARD">DEBIT_CARD</option>
-                  <option value="UPI">UPI</option>
-                  <option value="NET_BANKING">NET_BANKING</option>
+                <select className="tx-select" name="paymentMethod" value={formData.paymentMethod} onChange={handleInputChange} style={selectStyle}>
+                  {['CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'UPI', 'NET_BANKING'].map((method) => (
+                    <option key={method} value={method} style={optionStyle}>
+                      {formatPaymentLabel(method)}
+                    </option>
+                  ))}
                 </select>
              </div>
              <button type="submit" className="btn-primary" disabled={loading || !formData.categoryId} style={{ marginTop: '16px', padding: '14px', width: '100%', opacity: (!formData.categoryId) ? 0.6 : 1, cursor: (!formData.categoryId) ? 'not-allowed' : 'pointer' }}>
