@@ -1,6 +1,6 @@
 # ExpensePro — Design Document
 
-> **Version:** 1.0.0 · **Date:** April 2026 · **Author:** Engineering Team
+> **Version:** 1.0.0 · **Date:** April 2026 · 
 
 ---
 
