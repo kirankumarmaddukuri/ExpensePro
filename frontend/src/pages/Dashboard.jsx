@@ -18,6 +18,9 @@ export default function Dashboard() {
     balance: 0,
     totalIncome: 0,
     totalExpenses: 0,
+    balanceChangePct: 0,
+    incomeChangePct: 0,
+    expenseChangePct: 0,
     recentTransactions: [],
     monthlyTrend: []
   });
@@ -45,15 +48,33 @@ export default function Dashboard() {
     return months[monthNum - 1] || monthNum;
   };
 
+  const formatPercent = (value) => {
+    const numeric = Number(value || 0);
+    return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(2)}%`;
+  };
+
+  const getPercentStyle = (value, positiveColorVar, negativeColorVar = '--color-expense') => {
+    const numeric = Number(value || 0);
+    const isPositive = numeric >= 0;
+    const positiveBg = positiveColorVar === '--color-expense' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+    const negativeBg = negativeColorVar === '--color-expense' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+    return {
+      color: isPositive ? `var(${positiveColorVar})` : `var(${negativeColorVar})`,
+      backgroundColor: isPositive ? positiveBg : negativeBg,
+      padding: '2px 8px',
+      borderRadius: '12px'
+    };
+  };
+
   const chartData = {
     labels: summary.monthlyTrend.length > 0 
-      ? summary.monthlyTrend.map(d => getMonthName(d[0]))
+      ? summary.monthlyTrend.map(d => `${getMonthName(Number(d[1]))} ${String(d[0]).slice(-2)}`)
       : ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
     datasets: [
       {
         label: 'Expenses',
         data: summary.monthlyTrend.length > 0 
-          ? summary.monthlyTrend.map(d => d[1])
+          ? summary.monthlyTrend.map(d => Number(d[2] || 0))
           : [0, 0, 0, 0, 0, summary.totalExpenses],
         borderColor: '#7c3aed',
         backgroundColor: 'rgba(124, 58, 237, 0.15)',
@@ -103,28 +124,28 @@ export default function Dashboard() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '24px' }}>
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Total Balance</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Balance (This Month)</p>
             <h2 style={{ fontSize: '32px', margin: '0 0 16px 0', letterSpacing: '-1px' }}>{formatCurrency(summary.balance)}</h2>
             <div style={{ display: 'flex', gap: '8px', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-income)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>+0%</span>
+              <span style={getPercentStyle(summary.balanceChangePct, '--color-income')}>{formatPercent(summary.balanceChangePct)}</span>
               <span style={{ color: 'var(--text-muted)' }}>vs last month</span>
             </div>
           </div>
           
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Income</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Income (This Month)</p>
             <h2 style={{ fontSize: '32px', margin: '0 0 16px 0', letterSpacing: '-1px' }}>{formatCurrency(summary.totalIncome)}</h2>
             <div style={{ display: 'flex', gap: '8px', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-income)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>+0%</span>
+              <span style={getPercentStyle(summary.incomeChangePct, '--color-income')}>{formatPercent(summary.incomeChangePct)}</span>
               <span style={{ color: 'var(--text-muted)' }}>vs last month</span>
             </div>
           </div>
           
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Expenses</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px', fontWeight: 500 }}>Expenses (This Month)</p>
             <h2 style={{ fontSize: '32px', margin: '0 0 16px 0', letterSpacing: '-1px' }}>{formatCurrency(summary.totalExpenses)}</h2>
              <div style={{ display: 'flex', gap: '8px', fontSize: '13px' }}>
-              <span style={{ color: 'var(--color-expense)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '12px' }}>+0%</span>
+              <span style={getPercentStyle(summary.expenseChangePct, '--color-expense', '--color-income')}>{formatPercent(summary.expenseChangePct)}</span>
               <span style={{ color: 'var(--text-muted)' }}>vs last month</span>
             </div>
           </div>

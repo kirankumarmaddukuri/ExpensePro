@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -99,20 +100,30 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> getDashboardSummary(Long userId) {
-        BigDecimal income = transactionRepository.getTotalIncome(userId);
-        BigDecimal expense = transactionRepository.getTotalExpenses(userId);
-        
-        income = income != null ? income : BigDecimal.ZERO;
-        expense = expense != null ? expense : BigDecimal.ZERO;
+        LocalDate now = LocalDate.now();
+        LocalDate currentMonthStart = now.withDayOfMonth(1);
+        LocalDate currentMonthEnd = currentMonthStart.plusMonths(1).minusDays(1);
+        LocalDate lastMonthStart = currentMonthStart.minusMonths(1);
+        LocalDate lastMonthEnd = currentMonthStart.minusDays(1);
+
+        BigDecimal income = valueOrZero(transactionRepository.getTotalIncomeByDateRange(userId, currentMonthStart, currentMonthEnd));
+        BigDecimal expense = valueOrZero(transactionRepository.getTotalExpensesByDateRange(userId, currentMonthStart, currentMonthEnd));
         BigDecimal balance = income.subtract(expense);
+
+        BigDecimal lastMonthIncome = valueOrZero(transactionRepository.getTotalIncomeByDateRange(userId, lastMonthStart, lastMonthEnd));
+        BigDecimal lastMonthExpense = valueOrZero(transactionRepository.getTotalExpensesByDateRange(userId, lastMonthStart, lastMonthEnd));
+        BigDecimal lastMonthBalance = lastMonthIncome.subtract(lastMonthExpense);
 
         Map<String, Object> summary = new HashMap<>();
         summary.put("balance", balance);
         summary.put("totalIncome", income);
         summary.put("totalExpenses", expense);
+        summary.put("balanceChangePct", calculatePercentChange(balance, lastMonthBalance));
+        summary.put("incomeChangePct", calculatePercentChange(income, lastMonthIncome));
+        summary.put("expenseChangePct", calculatePercentChange(expense, lastMonthExpense));
  
         // Add monthly trend (Last 6 months)
-        LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6).withDayOfMonth(1);
+        LocalDate sixMonthsAgo = currentMonthStart.minusMonths(5);
         List<Object[]> monthlyData = transactionRepository.findMonthlySpending(userId, sixMonthsAgo);
         summary.put("monthlyTrend", monthlyData);
  
@@ -124,6 +135,20 @@ public class TransactionService {
         summary.put("recentTransactions", recent);
  
         return summary;
+    }
+
+    private BigDecimal valueOrZero(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
+    }
+
+    private BigDecimal calculatePercentChange(BigDecimal current, BigDecimal previous) {
+        if (previous.compareTo(BigDecimal.ZERO) == 0) {
+            return current.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO : BigDecimal.valueOf(100);
+        }
+        return current.subtract(previous)
+                .divide(previous.abs(), 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
     }
  
     @Transactional(readOnly = true)

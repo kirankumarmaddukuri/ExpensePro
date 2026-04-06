@@ -33,14 +33,31 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.id = :userId AND t.isDeleted = false AND t.type = 'EXPENSE'")
     java.math.BigDecimal getTotalExpenses(@Param("userId") Long userId);
 
+    @Query("SELECT SUM(t.amount) FROM Transaction t " +
+           "WHERE t.user.id = :userId AND t.isDeleted = false AND t.type = 'INCOME' " +
+           "AND t.transactionDate >= :startDate AND t.transactionDate <= :endDate")
+    java.math.BigDecimal getTotalIncomeByDateRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t " +
+           "WHERE t.user.id = :userId AND t.isDeleted = false AND t.type = 'EXPENSE' " +
+           "AND t.transactionDate >= :startDate AND t.transactionDate <= :endDate")
+    java.math.BigDecimal getTotalExpensesByDateRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
     @Query("SELECT " +
+           "  EXTRACT(YEAR FROM t.transactionDate) as year, " +
            "  EXTRACT(MONTH FROM t.transactionDate) as month, " +
            "  SUM(t.amount) as total " +
            "FROM Transaction t " +
            "WHERE t.user.id = :userId AND t.isDeleted = false AND t.type = 'EXPENSE' " +
            "AND t.transactionDate >= :startDate " +
-           "GROUP BY EXTRACT(MONTH FROM t.transactionDate) " +
-           "ORDER BY month")
+           "GROUP BY EXTRACT(YEAR FROM t.transactionDate), EXTRACT(MONTH FROM t.transactionDate) " +
+           "ORDER BY year, month")
     List<Object[]> findMonthlySpending(@Param("userId") Long userId, @Param("startDate") LocalDate startDate);
 
     @Query("SELECT c.name, SUM(t.amount), c.color, c.icon " +
