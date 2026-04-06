@@ -35,7 +35,6 @@ A comprehensive full-stack Personal Finance Management Application designed to h
 ### Prerequisites
 
 Ensure you have the following installed on your local machine:
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
 - [Java Development Kit (JDK) 17](https://adoptium.net/)
 - [Maven](https://maven.apache.org/)
 - [PostgreSQL](https://www.postgresql.org/)
