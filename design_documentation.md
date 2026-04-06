@@ -1,4 +1,4 @@
-# ExpensePro — Design Document
+# ExpensePro — Design Documentation
 
 > **Version:** 1.0.0 · **Date:** April 2026 · 
 
